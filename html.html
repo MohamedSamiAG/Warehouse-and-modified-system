@@ -1,0 +1,2355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المخزون - الإدارات والفروع</title>
+    
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبات لإنشاء PDF و Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --gray: #95a5a6;
+            --text: #333;
+            --border: #ddd;
+            --bg: #f8f9fa;
+        }
+
+        .dark-mode {
+            --primary: #2980b9;
+            --secondary: #27ae60;
+            --danger: #c0392b;
+            --warning: #e67e22;
+            --dark: #1a252f;
+            --light: #2c3e50;
+            --gray: #7f8c8d;
+            --text: #ecf0f1;
+            --border: #34495e;
+            --bg: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+      header {
+  background: linear-gradient(135deg, #00264d, #043d75);
+  color: #fff;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+header:hover {
+  background: linear-gradient(135deg, #003366, #0099ff);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cib-logo {
+  width: 120px;
+  height: auto;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.4rem;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cib-logo:hover {
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+}
+
+.anniversary {
+  background: #ffd700;
+  color: #00264d;
+  font-weight: bold;
+  font-size: 1.2rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+}
+
+.controls .btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.controls .btn-warning {
+  background: #ff9800;
+  color: #fff;
+}
+
+.controls .btn-danger {
+  background: #e53935;
+  color: #fff;
+}
+   /* أنماط CSS السابقة تبقى كما هي */
+        /* أنماط جديدة لنظام التقارير */
+        .reports-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .reports-section {
+            background: var(--dark);
+        }
+
+        .report-results {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .report-table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            margin-top: 15px;
+        }
+
+        .report-summary {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .dark-mode .report-summary {
+            background: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+
+        .summary-item .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .summary-item .label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+.controls .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* نظام الأيقونات الجديد */
+        .dashboard-icons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .icon-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dark-mode .icon-card {
+            background: var(--dark);
+        }
+
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .icon-info {
+            flex: 1;
+        }
+
+        .icon-info h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--gray);
+        }
+
+        .icon-info .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .icon-primary { background: linear-gradient(135deg, var(--primary), #2980b9); }
+        .icon-secondary { background: linear-gradient(135deg, var(--secondary), #27ae60); }
+        .icon-danger { background: linear-gradient(135deg, var(--danger), #c0392b); }
+        .icon-warning { background: linear-gradient(135deg, var(--warning), #e67e22); }
+        .icon-dark { background: linear-gradient(135deg, var(--dark), #1a252f); }
+        .icon-info-color { background: linear-gradient(135deg, #17a2b8, #138496); }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode .stat-card {
+            background: var(--dark);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--gray);
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .tabs {
+            background: var(--dark);
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            background-color: rgba(52, 152, 219, 0.1);
+            font-weight: bold;
+        }
+
+        .tab:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .dark-mode .tab.active {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .filters {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .filters {
+            background: var(--dark);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: white;
+            color: var(--text);
+        }
+
+        .dark-mode input, 
+        .dark-mode select, 
+        .dark-mode textarea {
+            background: var(--light);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .form-grid {
+            background: var(--dark);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .dark-mode .table-container {
+            background: var(--dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: rgba(52, 152, 219, 0.1);
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .dark-mode th {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        tr:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .dark-mode tr:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+
+        .branch-item {
+            background-color: rgba(243, 156, 18, 0.1) !important;
+        }
+
+        .btn-icon {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-edit {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-notes {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .branch-badge {
+            background-color: var(--warning);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-right: 5px;
+        }
+
+        .count-badge {
+            background-color: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-right: 5px;
+        }
+
+        .departments-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .departments-section {
+            background: var(--dark);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .hamburger-menu {
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .departments-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .departments-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .departments-content.expanded {
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .departments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .department-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .department-item:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .department-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .department-id {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .department-actions button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            margin-left: 5px;
+        }
+
+        .bulk-actions {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .bulk-actions {
+            background: var(--dark);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode .modal-content {
+            background: var(--dark);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* أنماط جديدة لنظام التصفية حسب الصنف */
+        .category-filter {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .category-filter {
+            background: var(--dark);
+        }
+
+        .category-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .category-result-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .dark-mode .category-result-card {
+            background: var(--dark);
+        }
+
+        .category-result-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-result-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .category-counts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .category-count {
+            background: var(--light);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+
+        .dark-mode .category-count {
+            background: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .category-count .count {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .category-count .label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .dashboard-icons {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .header-controls {
+                width: 100%;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .header-controls input {
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            
+            .category-results {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-icons {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: none;
+                border-right: 3px solid transparent;
+            }
+            
+            .tab.active {
+                border-bottom: none;
+                border-right: 3px solid var(--primary);
+            }
+        }
+    </style>
+</head>
+<body>
+   <header>
+  <div class="container">
+    <div class="header-content">
+     <div class="logo">
+  <img src="cib.jpg" alt="CIB - 50 سنة" class="cib-logo" />
+</div>
+
+      <h1>مخازن البنك التجاري الدولي CIB</h1>
+      <div class="controls">
+        <button id="darkToggle" class="btn btn-warning">تبديل المظهر</button>
+        <button id="clearAllBtn" class="btn btn-danger">مسح الكل</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+    <div class="container">
+        <!-- نظام الأيقونات الجديد -->
+        <div class="dashboard-icons">
+            <div class="icon-card" id="totalAllCard">
+                <div class="icon-wrapper icon-primary">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>إجمالي المخزون</h3>
+                    <div id="totalAll" class="value">0</div>
+                </div>
+            </div>
+            
+            <div class="icon-card" id="totalMainCard">
+                <div class="icon-wrapper icon-secondary">
+                    <i class="fas fa-warehouse"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>المخزن الرئيسي</h3>
+                    <div id="totalMain" class="value">0</div>
+                </div>
+            </div>
+            
+            <div class="icon-card" id="totalCustomsCard">
+                <div class="icon-wrapper icon-warning">
+                    <i class="fas fa-passport"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>مخزن الجمارك</h3>
+                    <div id="totalCustoms" class="value">0</div>
+                </div>
+            </div>
+            
+            <div class="icon-card" id="total10thCard">
+                <div class="icon-wrapper icon-info-color">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>مخزن العاشر من رمضان</h3>
+                    <div id="total10th" class="value">0</div>
+                </div>
+            </div>
+            
+            <div class="icon-card" id="totalDepartmentsCard">
+                <div class="icon-wrapper icon-dark">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>الإدارات والفروع</h3>
+                    <div id="totalDepartments" class="value">0</div>
+                </div>
+            </div>
+            
+            <div class="icon-card" id="totalSalesCard">
+                <div class="icon-wrapper icon-danger">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="icon-info">
+                    <h3>عمليات البيع</h3>
+                    <div id="totalSales" class="value">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم تصفية الأصناف -->
+        <div class="category-filter">
+            <h2>البحث عن الأصناف</h2>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="categorySearch">ابحث عن صنف:</label>
+                    <input type="text" id="categorySearch" placeholder="اكتب اسم الصنف (مثال: كرسي)">
+                </div>
+                <div class="filter-group">
+                    <label for="categoryWarehouseFilter">تصفية حسب المخزن:</label>
+                    <select id="categoryWarehouseFilter">
+                        <option value="all">جميع المخازن</option>
+                        <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                        <option value="مخزن الجمارك">مخزن الجمارك</option>
+                        <option value="مخزن العاشر من رمضان">مخزن العاشر من رمضان</option>
+                        <option value="departments">الإدارات والفروع</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button id="searchCategoryBtn" class="btn btn-primary">بحث</button>
+                </div>
+            </div>
+            
+            <div id="categoryResults" class="category-results">
+                <!-- سيتم ملء هذا القسم بنتائج البحث -->
+            </div>
+        </div>
+
+        <div class="tabs" id="tabs">
+            <div class="tab active" data-tab="مخزن">المخزن الرئيسي</div>
+            <div class="tab" data-tab="وارد">وارد</div>
+            <div class="tab" data-tab="صادر">صادر</div>
+            <div class="tab" data-tab="بيع">بيع</div>
+            <div class="tab" data-tab="تحت الفحص">تحت الفحص</div>
+        </div>
+
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="search">بحث:</label>
+                    <input type="text" id="search" placeholder="ابحث في كل الحقول...">
+                </div>
+                <div class="filter-group">
+                    <label for="warehouseFilter">تصفية حسب المخزن:</label>
+                    <select id="warehouseFilter">
+                        <option value="all">جميع المخازن</option>
+                        <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                        <option value="مخزن الجمارك">مخزن الجمارك</option>
+                        <option value="مخزن العاشر من رمضان">مخزن العاشر من رمضان</option>
+                        <option value="departments">الإدارات والفروع</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="startDateFilter">من تاريخ:</label>
+                    <input type="date" id="startDateFilter">
+                </div>
+                <div class="filter-group">
+                    <label for="endDateFilter">إلى تاريخ:</label>
+                    <input type="date" id="endDateFilter">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div>
+                <label for="date">التاريخ:</label>
+                <input type="date" id="date">
+            </div>
+            <div>
+                <label for="category">الصنف:</label>
+                <input type="text" id="category" placeholder="اسم الصنف">
+            </div>
+            <div>
+                <label for="codes">الكود (سطر لكل كود):</label>
+                <textarea id="codes" rows="3" placeholder="1- كود 1&#10;2- كود 2"></textarea>
+            </div>
+            <div>
+                <label for="serials">السيريال (سطر لكل سيريال):</label>
+                <textarea id="serials" rows="3" placeholder="1- سيريال 1&#10;2- سيريال 2"></textarea>
+            </div>
+            <div>
+                <label for="mac">MAC (سطر لكل عنوان):</label>
+                <textarea id="mac" rows="3" placeholder="1- MAC 1&#10;2- MAC 2"></textarea>
+            </div>
+            <div>
+                <label for="status">الحالة:</label>
+                <select id="status">
+                    <option value="حفظ">حفظ</option>
+                    <option value="هالك">هالك</option>
+                    <option value="تحت الفحص">تحت الفحص</option>
+                    <option value="صالح">صالح</option>
+                </select>
+            </div>
+            <div>
+                <label for="saveBy">حفظ بواسطة:</label>
+                <input type="text" id="saveBy" placeholder="اسم المسؤول">
+            </div>
+            <div>
+                <label for="from">وارد من:</label>
+                <input type="text" id="from" placeholder="المصدر">
+            </div>
+            <div>
+                <label for="to">صادر إلى:</label>
+                <input type="text" id="to" placeholder="الوجهة">
+            </div>
+            <div>
+                <label for="toDate">تاريخ الصادر:</label>
+                <input type="date" id="toDate">
+            </div>
+            <div>
+                <label for="underCheck">تحت الفحص:</label>
+                <select id="underCheck">
+                    <option value="نعم">نعم</option>
+                    <option value="لا">لا</option>
+                </select>
+            </div>
+            <div>
+                <label for="company">الشركة:</label>
+                <input type="text" id="company" placeholder="اسم الشركة">
+            </div>
+            <div>
+                <label for="operation">العملية:</label>
+                <select id="operation">
+                    <option value="مخزن">مخزن</option>
+                    <option value="وارد">وارد</option>
+                    <option value="صادر">صادر</option>
+                    <option value="بيع">بيع</option>
+                    <option value="تحت الفحص">تحت الفحص</option>
+                </select>
+            </div>
+            <div>
+                <label for="warehouse">المخزن:</label>
+                <select id="warehouse">
+                    <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                    <option value="مخزن الجمارك">مخزن الجمارك</option>
+                    <option value="مخزن العاشر من رمضان">مخزن العاشر من رمضان</option>
+                </select>
+            </div>
+            <div>
+                <label for="notes">ملاحظات:</label>
+                <textarea id="notes" rows="3" placeholder="ملاحظات إضافية"></textarea>
+            </div>
+            <div class="form-actions">
+                <button id="addBtn" class="btn btn-primary">حفظ / إضافة</button>
+                <button id="resetBtn" class="btn btn-secondary">مسح النموذج</button>
+            </div>
+        </div>
+
+        <div class="departments-section">
+            <div class="section-header">
+                <h2>
+                    <span id="toggleDepartments" class="hamburger-menu">☰</span>
+                    إدارة الإدارات والفروع
+                </h2>
+                <div class="header-controls">
+                    <input type="text" id="departmentSearch" placeholder="ابحث في الإدارات..." style="width: 200px; margin-left: 10px;">
+                    <input type="text" id="newDepartment" placeholder="اسم الإدارة/الفرع الجديد" style="width: 200px; margin-left: 10px;">
+                    <button id="addDepartmentBtn" class="btn btn-secondary">إضافة</button>
+                </div>
+            </div>
+            
+            <div id="departmentsContent" class="departments-content expanded">
+                <div id="departmentsList" class="departments-list"></div>
+            </div>
+        </div>
+    <!-- المحتوى الحالي يبقى كما هو -->
+    
+    <!-- قسم التقارير الجديد -->
+    <div class="container">
+        <div class="reports-section">
+            <div class="section-header">
+                <h2>
+                    <span class="hamburger-menu" id="toggleReports">☰</span>
+                    التقارير المتقدمة
+                </h2>
+            </div>
+            
+            <div id="reportsContent" class="departments-content expanded">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="reportCategory">الصنف:</label>
+                        <input type="text" id="reportCategory" placeholder="اسم الصنف (اختياري)">
+                    </div>
+                    <div class="filter-group">
+                        <label for="reportWarehouse">المخزن:</label>
+                        <select id="reportWarehouse">
+                            <option value="all">جميع المخازن</option>
+                            <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                            <option value="مخزن الجمارك">مخزن الجمارك</option>
+                            <option value="مخزن العاشر من رمضان">مخزن العاشر من رمضان</option>
+                            <option value="departments">الإدارات والفروع</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="reportOperation">العملية:</label>
+                        <select id="reportOperation">
+                            <option value="all">جميع العمليات</option>
+                            <option value="مخزن">مخزن</option>
+                            <option value="وارد">وارد</option>
+                            <option value="صادر">صادر</option>
+                            <option value="بيع">بيع</option>
+                            <option value="تحت الفحص">تحت الفحص</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="reportStartDate">من تاريخ:</label>
+                        <input type="date" id="reportStartDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="reportEndDate">إلى تاريخ:</label>
+                        <input type="date" id="reportEndDate">
+                    </div>
+                    <div class="filter-group">
+                        <label for="reportStatus">الحالة:</label>
+                        <select id="reportStatus">
+                            <option value="all">جميع الحالات</option>
+                            <option value="حفظ">حفظ</option>
+                            <option value="هالك">هالك</option>
+                            <option value="تحت الفحص">تحت الفحص</option>
+                            <option value="صالح">صالح</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button id="generateReportBtn" class="btn btn-primary">إنشاء التقرير</button>
+                    </div>
+                </div>
+                
+                <div id="reportResults" class="report-results">
+                    <div class="report-summary" id="reportSummary">
+                        <!-- سيتم ملء هذا القسم بملخص التقرير -->
+                    </div>
+                    
+                    <div class="report-actions">
+                        <button id="exportExcelBtn" class="btn btn-secondary">
+                            <i class="fas fa-file-excel"></i> تصدير إلى Excel
+                        </button>
+                        <button id="exportPdfBtn" class="btn btn-danger">
+                            <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                        </button>
+                    </div>
+                    
+                    <div class="report-table-container">
+                        <table id="reportTable">
+                            <thead>
+                                <tr>
+                                    <th>التاريخ</th>
+                                    <th>الصنف</th>
+                                    <th>الكود</th>
+                                    <th>السيريال</th>
+                                    <th>MAC</th>
+                                    <th>الحالة</th>
+                                    <th>حفظ بواسطة</th>
+                                    <th>وارد من</th>
+                                    <th>صادر إلى</th>
+                                    <th>تاريخ الصادر</th>
+                                    <th>تحت الفحص</th>
+                                    <th>الشركة</th>
+                                    <th>المخزن</th>
+                                    <th>العملية</th>
+                                    <th>ملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                                <!-- سيتم ملء هذا القسم بنتائج التقرير -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="bulk-actions">
+            <h2>الإجراءات الجماعية</h2>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="bulkActionField">الإجراء:</label>
+                    <select id="bulkActionField">
+                        <option value="">اختر إجراء...</option>
+                        <option value="changeOperation">تغيير العملية</option>
+                        <option value="changeStatus">تغيير الحالة</option>
+                        <option value="moveWarehouse">نقل إلى مخزن</option>
+                        <option value="moveToDepartment">نقل إلى إدارة/فرع</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select id="bulkOperation" style="display: none;">
+                        <option value="مخزن">مخزن</option>
+                        <option value="وارد">وارد</option>
+                        <option value="صادر">صادر</option>
+                        <option value="بيع">بيع</option>
+                        <option value="تحت الفحص">تحت الفحص</option>
+                    </select>
+                    <select id="bulkStatus" style="display: none;">
+                        <option value="حفظ">حفظ</option>
+                        <option value="هالك">هالك</option>
+                        <option value="تحت الفحص">تحت الفحص</option>
+                        <option value="صالح">صالح</option>
+                    </select>
+                    <select id="bulkWarehouse" style="display: none;">
+                        <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                        <option value="مخزن الجمارك">مخزن الجمارك</option>
+                        <option value="مخزن العاشر من رمضان">مخزن العاشر من رمضان</option>
+                    </select>
+                    <select id="bulkDepartment" style="display: none;"></select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button id="applyBulkBtn" class="btn btn-primary">تطبيق على المحدد</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="headCheckbox"></th>
+                        <th>التاريخ</th>
+                        <th>الصنف</th>
+                        <th>الكود</th>
+                        <th>السيريال</th>
+                        <th>MAC</th>
+                        <th>الحالة</th>
+                        <th>حفظ بواسطة</th>
+                        <th>وارد من</th>
+                        <th>صادر إلى</th>
+                        <th>تاريخ الصادر</th>
+                        <th>تحت الفحص</th>
+                        <th>الشركة</th>
+                        <th>المخزن</th>
+                        <th>العملية</th>
+                        <th>ملاحظات</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="rows">
+                    <!-- سيتم ملء هذا القسم بواسطة JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>إدارة الملاحظات</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="modalNotes" rows="5" placeholder="أضف ملاحظات هنا..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelNotes" class="btn btn-secondary">إلغاء</button>
+                <button id="saveNotes" class="btn btn-primary">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        /* ===== state ===== */
+        const LS_KEY = 'store_multi';
+        const DEPARTMENTS_KEY = 'store_departments';
+        let store = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+        let departments = JSON.parse(localStorage.getItem(DEPARTMENTS_KEY) || '[]');
+        let editIndex = null;
+        let currentTab = 'مخزن';
+        let searchQuery = '';
+        let currentWarehouseFilter = 'all';
+        let currentNotesIndex = null;
+
+        // المخازن الأساسية
+        const MAIN_WAREHOUSES = ['المخزن الرئيسي', 'مخزن الجمارك', 'مخزن العاشر من رمضان'];
+
+        /* ===== helpers ===== */
+        const $ = s => document.querySelector(s);
+        const $$ = s => Array.from(document.querySelectorAll(s));
+
+        function showToast(msg){
+            const el = $('#toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(()=> el.classList.remove('show'), 2000);
+        }
+
+        function saveLS(){ 
+            localStorage.setItem(LS_KEY, JSON.stringify(store)); 
+            localStorage.setItem(DEPARTMENTS_KEY, JSON.stringify(departments));
+        }
+
+        function cleanList(text){
+            if(!text) return [];
+            return text.split('\n').map(l => l.trim().replace(/^\d+-\s*/, '')).filter(Boolean);
+        }
+
+        function handleNumbering(e){
+            if(e.key === 'Enter'){
+                e.preventDefault();
+                const t = e.target;
+                const cursorPos = t.selectionStart;
+                const textBefore = t.value.substring(0, cursorPos);
+                const textAfter = t.value.substring(cursorPos);
+                const linesBefore = textBefore.split('\n');
+                const lineNumber = linesBefore.length;
+                
+                const newText = textBefore + '\n' + lineNumber + '-';
+                t.value = newText + textAfter;
+                
+                const newCursorPos = newText.length;
+                t.setSelectionRange(newCursorPos, newCursorPos);
+            }
+        }
+
+        function handleMACNumbering(e){
+            if(e.key === 'Enter'){
+                e.preventDefault();
+                const t = e.target;
+                const cursorPos = t.selectionStart;
+                const textBefore = t.value.substring(0, cursorPos);
+                const textAfter = t.value.substring(cursorPos);
+                const linesBefore = textBefore.split('\n');
+                const lineNumber = linesBefore.length;
+                
+                const newText = textBefore + '\n' + lineNumber + '-';
+                t.value = newText + textAfter;
+                
+                const newCursorPos = newText.length;
+                t.setSelectionRange(newCursorPos, newCursorPos);
+            }
+        }
+
+        function toggleDepartments() {
+            const content = $('#departmentsContent');
+            const toggleBtn = $('#toggleDepartments');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                toggleBtn.textContent = '☰';
+            } else {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                toggleBtn.textContent = '✕';
+            }
+        }
+
+        function filterDepartments() {
+            const searchTerm = $('#departmentSearch').value.toLowerCase();
+            const departmentItems = $$('.department-item');
+            
+            departmentItems.forEach(item => {
+                const departmentName = item.getAttribute('data-department').toLowerCase();
+                if (departmentName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        /* ===== render & stats ===== */
+        function computeStats(){
+            const totalMain = store.filter(i => i.warehouse === 'المخزن الرئيسي').length;
+            const totalCustoms = store.filter(i => i.warehouse === 'مخزن الجمارك').length;
+            const total10th = store.filter(i => i.warehouse === 'مخزن العاشر من رمضان').length;
+            const totalAll = totalMain + totalCustoms + total10th;
+            const totalDepartments = store.filter(i => departments.includes(i.warehouse)).length;
+            const totalSales = store.filter(i => i.operation === 'بيع').length;
+            
+            $('#totalAll').textContent = totalAll;
+            $('#totalMain').textContent = totalMain;
+            $('#totalCustoms').textContent = totalCustoms;
+            $('#total10th').textContent = total10th;
+            $('#totalDepartments').textContent = totalDepartments;
+            $('#totalSales').textContent = totalSales;
+        }
+
+        function enhancedSearch(item) {
+            if (!searchQuery) return true;
+            
+            const q = searchQuery.toLowerCase();
+            const searchFields = [
+                item.code, item.serial, item.mac, item.category, 
+                item.from, item.to, item.company, item.saveBy, item.warehouse
+            ];
+            
+            return searchFields.filter(Boolean).some(v => String(v).toLowerCase().includes(q));
+        }
+
+        function matchesWarehouseFilter(item){
+            if(currentWarehouseFilter === 'all') return true;
+            if(currentWarehouseFilter === 'departments') return departments.includes(item.warehouse);
+            return item.warehouse === currentWarehouseFilter;
+        }
+
+        function matchesDateFilter(item) {
+            const startDate = $('#startDateFilter').value;
+            const endDate = $('#endDateFilter').value;
+            
+            if (!startDate && !endDate) return true;
+            
+            const itemDate = new Date(item.date);
+            
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                return itemDate >= start && itemDate <= end;
+            }
+            
+            if (startDate) {
+                const start = new Date(startDate);
+                return itemDate >= start;
+            }
+            
+            if (endDate) {
+                const end = new Date(endDate);
+                return itemDate <= end;
+            }
+            
+            return true;
+        }
+
+        function getItemsCountByDepartment(departmentName) {
+            return store.filter(item => item.warehouse === departmentName).length;
+        }
+
+        function render(){
+            computeStats();
+            renderDepartments();
+            const tbody = $('#rows');
+            tbody.innerHTML = '';
+            
+            const filteredData = store.filter(item => {
+                if (currentTab !== 'مخزن' && item.operation !== currentTab) return false;
+                if(!enhancedSearch(item)) return false;
+                if(!matchesWarehouseFilter(item)) return false;
+                if(!matchesDateFilter(item)) return false;
+                return true;
+            });
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
+                            لا توجد بيانات لعرضها. حاول تغيير عوامل التصفية أو إضافة عناصر جديدة.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredData.forEach((item, idx) => {
+                const tr = document.createElement('tr');
+                tr.dataset.idx = idx;
+                
+                if (departments.includes(item.warehouse)) tr.classList.add('branch-item');
+                
+                tr.innerHTML = 
+                    `<td><input type="checkbox" class="row-checkbox" data-idx="${idx}"></td>
+                    <td>${item.date || ''}</td><td>${item.category || ''}</td><td>${item.code || ''}</td>
+                    <td>${item.serial || ''}</td><td>${item.mac || ''}</td><td>${item.status || ''}</td>
+                    <td>${item.saveBy || ''}</td><td>${item.from || ''}</td><td>${item.to || ''}</td>
+                    <td>${item.toDate || ''}</td><td>${item.underCheck || ''}</td><td>${item.company || ''}</td>
+                    <td>${item.warehouse || ''} ${departments.includes(item.warehouse) ? '<span class="branch-badge">فرع</span>' : ''}</td>
+                    <td>${item.operation || ''}</td><td>${item.notes ? '📝' : ''}</td>
+                    <td>
+                        <button class="btn-icon btn-edit" data-edit="${idx}">تعديل</button>
+                        <button class="btn-icon btn-delete" data-del="${idx}">حذف</button>
+                        <button class="btn-icon btn-notes" data-notes="${idx}">ملاحظات</button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderDepartments() {
+            const departmentsList = $('#departmentsList');
+            departmentsList.innerHTML = '';
+            
+            const bulkDepartmentSelect = $('#bulkDepartment');
+            bulkDepartmentSelect.innerHTML = '';
+            
+            MAIN_WAREHOUSES.forEach(warehouse => {
+                const option = document.createElement('option');
+                option.value = warehouse;
+                option.textContent = warehouse;
+                bulkDepartmentSelect.appendChild(option);
+            });
+            
+            departments.forEach((department, index) => {
+                const count = getItemsCountByDepartment(department);
+                const departmentItem = document.createElement('div');
+                departmentItem.className = 'department-item';
+                departmentItem.setAttribute('data-department', department);
+                departmentItem.innerHTML = `
+                    <div class="department-info">
+                        <span class="department-id">${index + 1}</span>
+                        <span>${department}</span>
+                        <span class="count-badge">${count}</span>
+                    </div>
+                    <div class="department-actions">
+                        <button data-view="${department}">👁</button>
+                        <button data-remove="${department}">🗑</button>
+                    </div>
+                `;
+                departmentsList.appendChild(departmentItem);
+                
+                const option = document.createElement('option');
+                option.value = department;
+                option.textContent = department;
+                bulkDepartmentSelect.appendChild(option);
+            });
+        }
+
+        /* ===== CRUD / bulk ===== */
+        function getForm(){
+            return {
+                date: $('#date').value,
+                category: $('#category').value.trim(),
+                macsRaw: $('#mac').value.trim(),
+                status: $('#status').value,
+                codesRaw: $('#codes').value.trim(),
+                serialsRaw: $('#serials').value.trim(),
+                saveBy: $('#saveBy').value.trim(),
+                from: $('#from').value.trim(),
+                to: $('#to').value.trim(),
+                toDate: $('#toDate').value,
+                underCheck: $('#underCheck').value,
+                company: $('#company').value.trim(),
+                operation: $('#operation').value,
+                warehouse: $('#warehouse').value,
+                notes: $('#notes').value.trim()
+            };
+        }
+
+        function clearForm(){
+            ['date','category','mac','codes','serials','saveBy','from','to','toDate','company','notes'].forEach(id => {
+                const el = $('#'+id); if(el) el.value = '';
+            });
+            $('#status').value = 'حفظ';
+            $('#operation').value = 'مخزن';
+            $('#warehouse').value = 'المخزن الرئيسي';
+            $('#underCheck').value = '';
+            editIndex = null;
+            $('#addBtn').textContent = 'حفظ / إضافة';
+        }
+
+        function addOrUpdate(){
+            const f = getForm();
+            if(!f.date || !f.category){
+                showToast('من فضلك ادخل التاريخ و الصنف');
+                return;
+            }
+
+            const codes = cleanList(f.codesRaw);
+            const serials = cleanList(f.serialsRaw);
+            const macs = cleanList(f.macsRaw);
+            const max = Math.max(codes.length || 1, serials.length || 1, macs.length || 1);
+            const rows = [];
+            
+            for(let i=0;i<max;i++){
+                rows.push({
+                    date: f.date, category: f.category, code: codes[i] || '', serial: serials[i] || '',
+                    mac: macs[i] || '', status: f.status, saveBy: f.saveBy, from: f.from, to: f.to,
+                    toDate: f.toDate, underCheck: f.underCheck,
+                    company: f.company, operation: f.operation, warehouse: f.warehouse, notes: f.notes
+                });
+            }
+
+            if(editIndex !== null){
+                store[editIndex] = rows[0];
+                showToast('تم حفظ التعديل ✅');
+                editIndex = null;
+                $('#addBtn').textContent = 'حفظ / إضافة';
+            } else {
+                store.push(...rows);
+                showToast(`تمت إضافة ${rows.length} صف/صفوف ✅`);
+            }
+
+            saveLS();
+            render();
+            clearForm();
+        }
+
+        function startEdit(index){
+            const it = store[index];
+            if(!it) return;
+            
+            $('#date').value = it.date || '';
+            $('#category').value = it.category || '';
+            $('#codes').value = it.code || '';
+            $('#serials').value = it.serial || '';
+            $('#mac').value = it.mac || '';
+            $('#status').value = it.status || 'حفظ';
+            $('#saveBy').value = it.saveBy || '';
+            $('#from').value = it.from || '';
+            $('#to').value = it.to || '';
+            $('#toDate').value = it.toDate || '';
+            $('#underCheck').value = it.underCheck || '';
+            $('#company').value = it.company || '';
+            $('#operation').value = it.operation || 'مخزن';
+            $('#warehouse').value = it.warehouse || 'المخزن الرئيسي';
+            $('#notes').value = it.notes || '';
+
+            editIndex = index;
+            $('#addBtn').textContent = 'حفظ التعديل';
+            showToast('تم تحميل البيانات للتعديل ✏');
+            window.scrollTo({top:0, behavior:'smooth'});
+        }
+
+        function openNotesModal(index) {
+            const item = store[index];
+            if (!item) return;
+            
+            currentNotesIndex = index;
+            $('#modalNotes').value = item.notes || '';
+            $('#notesModal').classList.add('show');
+        }
+
+        function saveNotes() {
+            if (currentNotesIndex === null) return;
+            
+            store[currentNotesIndex].notes = $('#modalNotes').value;
+            saveLS();
+            render();
+            closeNotesModal();
+            showToast('تم حفظ الملاحظات ✅');
+        }
+
+        function closeNotesModal() {
+            $('#notesModal').classList.remove('show');
+            currentNotesIndex = null;
+        }
+
+        function removeItem(index){
+            if(!confirm('هل تريد حذف هذا الصف؟')) return;
+            
+            store.splice(index,1);
+            
+            saveLS();
+            render();
+            showToast('تم حذف الصف 🗑');
+        }
+
+        function clearAll(){
+            if(!confirm('هل تريد مسح كل البيانات؟')) return;
+            store = [];
+            saveLS();
+            render();
+            clearForm();
+            showToast('تم مسح جميع البيانات');
+        }
+
+        function applyBulk(){
+            const sel = $$('.row-checkbox').filter(cb => cb.checked).map(cb => Number(cb.dataset.idx));
+            
+            if(sel.length === 0){ showToast('اختر صفوف أولاً'); return; }
+            const action = $('#bulkActionField').value;
+            if(!action){ showToast('اختر إجراء جماعي'); return; }
+
+            if(action === 'changeOperation'){
+                const newOp = $('#bulkOperation').value;
+                sel.forEach(idx => store[idx].operation = newOp);
+                showToast('تم تغيير العملية للمحدد');
+            } else if(action === 'changeStatus'){
+                const newSt = $('#bulkStatus').value;
+                sel.forEach(idx => store[idx].status = newSt);
+                showToast('تم تغيير الحالة للمحدد');
+            } else if(action === 'moveWarehouse'){
+                const newWh = $('#bulkWarehouse').value;
+                sel.forEach(idx => store[idx].warehouse = newWh);
+                showToast('تم نقل المحدد للمخزن الجديد');
+            } else if(action === 'moveToDepartment'){
+                const newDepartment = $('#bulkDepartment').value;
+                sel.forEach(idx => store[idx].warehouse = newDepartment);
+                showToast('تم نقل المحدد للإدارة/الفرع الجديد');
+            }
+
+            saveLS();
+            render();
+        }
+
+        function addDepartment() {
+            const newDepartment = $('#newDepartment').value.trim();
+            if (!newDepartment) {
+                showToast('يرجى إدخال اسم إدارة/فرع');
+                return;
+            }
+            
+            if (departments.includes(newDepartment)) {
+                showToast('هذه الإدارة/الفرع موجود بالفعل');
+                return;
+            }
+            
+            departments.push(newDepartment);
+            $('#newDepartment').value = '';
+            saveLS();
+            render();
+            showToast('تم إضافة الإدارة/الفرع بنجاح ✅');
+        }
+
+        function removeDepartment(departmentName) {
+            if (!confirm(`هل تريد إزالة الإدارة/الفرع "${departmentName}"؟`)) return;
+            
+            departments = departments.filter(d => d !== departmentName);
+            saveLS();
+            render();
+            showToast('تم إزالة الإدارة/الفرع بنجاح ✅');
+        }
+
+        function viewSpecificDepartment(departmentName) {
+            currentWarehouseFilter = departmentName;
+            render();
+            showToast(`عرض ${departmentName}`);
+        }
+
+        // وظائف جديدة للبحث عن الأصناف
+        function searchCategory() {
+            const categoryName = $('#categorySearch').value.trim();
+            const warehouseFilter = $('#categoryWarehouseFilter').value;
+            
+            if (!categoryName) {
+                showToast('يرجى إدخال اسم صنف للبحث');
+                return;
+            }
+            
+            // تصفية البيانات حسب اسم الصنف
+            let filteredItems = store.filter(item => 
+                item.category && item.category.toLowerCase().includes(categoryName.toLowerCase())
+            );
+            
+            // تطبيق تصفية المخزن إذا تم اختياره
+            if (warehouseFilter !== 'all') {
+                if (warehouseFilter === 'departments') {
+                    filteredItems = filteredItems.filter(item => departments.includes(item.warehouse));
+                } else {
+                    filteredItems = filteredItems.filter(item => item.warehouse === warehouseFilter);
+                }
+            }
+            
+            // تجميع النتائج حسب الصنف والمخزن
+            const results = {};
+            filteredItems.forEach(item => {
+                if (!results[item.category]) {
+                    results[item.category] = {};
+                }
+                
+                if (!results[item.category][item.warehouse]) {
+                    results[item.category][item.warehouse] = 0;
+                }
+                
+                results[item.category][item.warehouse]++;
+            });
+            
+            // عرض النتائج
+            displayCategoryResults(results, categoryName);
+        }
+
+        function displayCategoryResults(results, searchTerm) {
+            const resultsContainer = $('#categoryResults');
+            resultsContainer.innerHTML = '';
+            
+            if (Object.keys(results).length === 0) {
+                resultsContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">
+                        لا توجد نتائج للصنف "${searchTerm}"
+                    </div>
+                `;
+                return;
+            }
+            
+            for (const [category, warehouses] of Object.entries(results)) {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'category-result-card';
+                
+                let countsHTML = '';
+                let totalCount = 0;
+                
+                for (const [warehouse, count] of Object.entries(warehouses)) {
+                    countsHTML += `
+                        <div class="category-count">
+                            <div class="count">${count}</div>
+                            <div class="label">${warehouse}</div>
+                        </div>
+                    `;
+                    totalCount += count;
+                }
+                
+                countsHTML = `
+                    <div class="category-count">
+                        <div class="count">${totalCount}</div>
+                        <div class="label">الإجمالي</div>
+                    </div>
+                    ${countsHTML}
+                `;
+                
+                resultCard.innerHTML = `
+                    <h4>${category}</h4>
+                    <div class="category-counts">
+                        ${countsHTML}
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(resultCard);
+            }
+        }
+
+        function addSampleData() {
+            if (store.length === 0) {
+                
+                ;
+                
+                store = sampleData;
+                
+                // إضافة بعض الإدارات والفروع الافتراضية
+                if (departments.length === 0) {
+                    departments = [];
+                }
+                
+                saveLS();
+                render();
+                showToast('تم تحميل بيانات تجريبية للاختبار');
+            }
+        }
+
+        // وظائف جديدة لنظام الأيقونات
+        function setupIconFilters() {
+            $('#totalAllCard').addEventListener('click', () => {
+                currentWarehouseFilter = 'all';
+                render();
+                showToast('عرض كل المخزون');
+            });
+            
+            $('#totalMainCard').addEventListener('click', () => {
+                currentWarehouseFilter = 'المخزن الرئيسي';
+                render();
+                showToast('عرض المخزن الرئيسي');
+            });
+            
+            $('#totalCustomsCard').addEventListener('click', () => {
+                currentWarehouseFilter = 'مخزن الجمارك';
+                render();
+                showToast('عرض مخزن الجمارك');
+            });
+            
+            $('#total10thCard').addEventListener('click', () => {
+                currentWarehouseFilter = 'مخزن العاشر من رمضان';
+                render();
+                showToast('عرض مخزن العاشر من رمضان');
+            });
+            
+            $('#totalDepartmentsCard').addEventListener('click', () => {
+                currentWarehouseFilter = 'departments';
+                render();
+                showToast('عرض الإدارات والفروع');
+            });
+            
+            $('#totalSalesCard').addEventListener('click', () => {
+                currentTab = 'بيع';
+                $$('.tab').forEach(t => t.classList.remove('active'));
+                $$('.tab').forEach(t => {
+                    if (t.dataset.tab === 'بيع') t.classList.add('active');
+                });
+                render();
+                showToast('عرض عمليات البيع');
+            });
+        }
+
+        /* ===== events wiring ===== */
+        $('#tabs').addEventListener('click', (e) => {
+            const btn = e.target.closest('.tab');
+            if(!btn) return;
+            $$('.tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            currentTab = btn.dataset.tab;
+            render();
+        });
+
+        $('#addBtn').addEventListener('click', addOrUpdate);
+        $('#resetBtn').addEventListener('click', clearForm);
+        $('#clearAllBtn').addEventListener('click', clearAll);
+
+        $('#search').addEventListener('input', (e) => { 
+            searchQuery = e.target.value.trim(); 
+            render(); 
+        });
+
+        $('#warehouseFilter').addEventListener('change', (e) => {
+            currentWarehouseFilter = e.target.value;
+            render();
+        });
+
+        $('#startDateFilter').addEventListener('change', render);
+        $('#endDateFilter').addEventListener('change', render);
+
+        $('#codes').addEventListener('keydown', handleNumbering);
+        $('#serials').addEventListener('keydown', handleNumbering);
+        $('#mac').addEventListener('keydown', handleMACNumbering);
+
+        $('#rows').addEventListener('click', (e) => {
+            const editBtn = e.target.closest('[data-edit]');
+            const delBtn  = e.target.closest('[data-del]');
+            const notesBtn = e.target.closest('[data-notes]');
+            
+            if(editBtn){
+                const idx = Number(editBtn.getAttribute('data-edit'));
+                startEdit(idx);
+            } else if(delBtn){
+                const idx = Number(delBtn.getAttribute('data-del'));
+                removeItem(idx);
+            } else if(notesBtn) {
+                const idx = Number(notesBtn.getAttribute('data-notes'));
+                openNotesModal(idx);
+            }
+        });
+
+        $('#headCheckbox').addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            $$('.row-checkbox').forEach(cb => cb.checked = checked);
+        });
+
+        $('#rows').addEventListener('change', (e) => {
+            if(e.target.classList.contains('row-checkbox')){
+                const all = $$('.row-checkbox');
+                const head = $('#headCheckbox');
+                if(all.length === 0) head.checked = false;
+                else head.checked = all.every(cb=>cb.checked);
+            }
+        });
+
+        $('#bulkActionField').addEventListener('change', (e) => {
+            const v = e.target.value;
+            $('#bulkOperation').style.display = v === 'changeOperation' ? 'inline-block' : 'none';
+            $('#bulkStatus').style.display = v === 'changeStatus' ? 'inline-block' : 'none';
+            $('#bulkWarehouse').style.display = v === 'moveWarehouse' ? 'inline-block' : 'none';
+            $('#bulkDepartment').style.display = v === 'moveToDepartment' ? 'inline-block' : 'none';
+        });
+
+        $('#applyBulkBtn').addEventListener('click', applyBulk);
+
+        $('#addDepartmentBtn').addEventListener('click', addDepartment);
+
+        document.addEventListener('click', (e) => {
+            if (e.target.hasAttribute('data-remove')) {
+                const departmentName = e.target.getAttribute('data-remove');
+                removeDepartment(departmentName);
+            }
+            
+            if (e.target.hasAttribute('data-view')) {
+                const departmentName = e.target.getAttribute('data-view');
+                viewSpecificDepartment(departmentName);
+            }
+        });
+
+        $('.modal-close').addEventListener('click', closeNotesModal);
+        $('#cancelNotes').addEventListener('click', closeNotesModal);
+        $('#saveNotes').addEventListener('click', saveNotes);
+
+        $('#notesModal').addEventListener('click', (e) => {
+            if (e.target === $('#notesModal')) closeNotesModal();
+        });
+
+        $('#darkToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        $('#toggleDepartments').addEventListener('click', toggleDepartments);
+        $('#departmentSearch').addEventListener('input', filterDepartments);
+
+        // أحداث جديدة للبحث عن الأصناف
+        $('#searchCategoryBtn').addEventListener('click', searchCategory);
+        $('#categorySearch').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchCategory();
+            }
+        });
+            // ===== وظائف التقارير الجديدة =====
+        
+        // تهيئة تاريخ البداية والنهاية ليكونا الشهر الحالي
+        function initReportDates() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            $('#reportStartDate').value = firstDay.toISOString().split('T')[0];
+            $('#reportEndDate').value = lastDay.toISOString().split('T')[0];
+        }
+        
+        // إنشاء التقرير بناءً على معايير التصفية
+        function generateReport() {
+            const category = $('#reportCategory').value.trim();
+            const warehouse = $('#reportWarehouse').value;
+            const operation = $('#reportOperation').value;
+            const status = $('#reportStatus').value;
+            const startDate = $('#reportStartDate').value;
+            const endDate = $('#reportEndDate').value;
+            
+            // تصفية البيانات
+            const filteredData = store.filter(item => {
+                // تصفية حسب الصنف
+                if (category && !item.category.toLowerCase().includes(category.toLowerCase())) {
+                    return false;
+                }
+                
+                // تصفية حسب المخزن
+                if (warehouse !== 'all') {
+                    if (warehouse === 'departments') {
+                        if (!departments.includes(item.warehouse)) return false;
+                    } else if (item.warehouse !== warehouse) {
+                        return false;
+                    }
+                }
+                
+                // تصفية حسب العملية
+                if (operation !== 'all' && item.operation !== operation) {
+                    return false;
+                }
+                
+                // تصفية حسب الحالة
+                if (status !== 'all' && item.status !== status) {
+                    return false;
+                }
+                
+                // تصفية حسب التاريخ
+                if (startDate && endDate) {
+                    const itemDate = new Date(item.date);
+                    const start = new Date(startDate);
+                    const end = new Date(endDate);
+                    end.setHours(23, 59, 59); // لتشمل اليوم بأكمله
+                    
+                    if (itemDate < start || itemDate > end) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // عرض النتائج
+            displayReportResults(filteredData);
+        }
+        
+        // عرض نتائج التقرير
+        function displayReportResults(data) {
+            const tableBody = $('#reportTableBody');
+            const reportSummary = $('#reportSummary');
+            const reportResults = $('#reportResults');
+            
+            // إظهار قسم النتائج
+            reportResults.style.display = 'block';
+            
+            // تفريغ الجدول
+            tableBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="15" style="text-align: center; padding: 20px; color: #6c757d;">
+                            لا توجد نتائج تطابق معايير البحث.
+                        </td>
+                    </tr>
+                `;
+                
+                reportSummary.innerHTML = `
+                    <div class="summary-item">
+                        <div class="value">0</div>
+                        <div class="label">عدد العناصر</div>
+                    </div>
+                `;
+                
+                return;
+            }
+            
+            // ملء الجدول بالبيانات
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date || ''}</td>
+                    <td>${item.category || ''}</td>
+                    <td>${item.code || ''}</td>
+                    <td>${item.serial || ''}</td>
+                    <td>${item.mac || ''}</td>
+                    <td>${item.status || ''}</td>
+                    <td>${item.saveBy || ''}</td>
+                    <td>${item.from || ''}</td>
+                    <td>${item.to || ''}</td>
+                    <td>${item.toDate || ''}</td>
+                    <td>${item.underCheck || ''}</td>
+                    <td>${item.company || ''}</td>
+                    <td>${item.warehouse || ''}</td>
+                    <td>${item.operation || ''}</td>
+                    <td>${item.notes || ''}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            // إنشاء ملخص التقرير
+            createReportSummary(data);
+        }
+        
+        // إنشاء ملخص التقرير
+        function createReportSummary(data) {
+            const reportSummary = $('#reportSummary');
+            
+            // إحصائيات أساسية
+            const totalItems = data.length;
+            
+            // تجميع حسب المخزن
+            const warehouseCounts = {};
+            data.forEach(item => {
+                const warehouse = item.warehouse || 'غير محدد';
+                warehouseCounts[warehouse] = (warehouseCounts[warehouse] || 0) + 1;
+            });
+            
+            // تجميع حسب العملية
+            const operationCounts = {};
+            data.forEach(item => {
+                const operation = item.operation || 'غير محدد';
+                operationCounts[operation] = (operationCounts[operation] || 0) + 1;
+            });
+            
+            // تجميع حسب الحالة
+            const statusCounts = {};
+            data.forEach(item => {
+                const status = item.status || 'غير محدد';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            
+            // بناء HTML للملخص
+            let summaryHTML = `
+                <div class="summary-item">
+                    <div class="value">${totalItems}</div>
+                    <div class="label">عدد العناصر</div>
+                </div>
+            `;
+            
+            // إضافة إحصائيات المخازن
+            for (const [warehouse, count] of Object.entries(warehouseCounts)) {
+                summaryHTML += `
+                    <div class="summary-item">
+                        <div class="value">${count}</div>
+                        <div class="label">${warehouse}</div>
+                    </div>
+                `;
+            }
+            
+            reportSummary.innerHTML = summaryHTML;
+        }
+        
+        // تصدير إلى Excel
+        function exportToExcel() {
+            // الحصول على البيانات من الجدول
+            const table = $('#reportTable');
+            const data = [];
+            
+            // الحصول على العناوين
+            const headers = [];
+            table.querySelectorAll('thead th').forEach(header => {
+                headers.push(header.textContent);
+            });
+            data.push(headers);
+            
+            // الحصول على صفوف البيانات
+            table.querySelectorAll('tbody tr').forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('td').forEach(cell => {
+                    rowData.push(cell.textContent);
+                });
+                data.push(rowData);
+            });
+            
+            // إنشاء مصنف Excel
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير المخزون");
+            
+            // حفظ الملف
+            const date = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `تقرير_المخزون_${date}.xlsx`);
+            
+            showToast('تم تصدير التقرير إلى Excel');
+        }
+        
+        // تصدير إلى PDF
+        function exportToPdf() {
+            // الحصول على البيانات من الجدول
+            const table = $('#reportTable');
+            const headers = [];
+            const data = [];
+            
+            // الحصول على العناوين
+            table.querySelectorAll('thead th').forEach(header => {
+                headers.push(header.textContent);
+            });
+            
+            // الحصول على صفوف البيانات
+            table.querySelectorAll('tbody tr').forEach(row => {
+                const rowData = [];
+                row.querySelectorAll('td').forEach(cell => {
+                    rowData.push(cell.textContent);
+                });
+                data.push(rowData);
+            });
+            
+            // إنشاء مستند PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // إضافة عنوان
+            const date = new Date().toISOString().slice(0, 10);
+            doc.setFontSize(16);
+            doc.text('تقرير المخزون', 105, 15, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`تاريخ التصدير: ${date}`, 105, 22, { align: 'center' });
+            
+            // إضافة الجدول
+            doc.autoTable({
+                head: [headers],
+                body: data,
+                startY: 30,
+                theme: 'grid',
+                styles: { font: 'tahoma', fontStyle: 'normal', fontSize: 8, halign: 'right' },
+                headStyles: { fillColor: [52, 152, 219], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [240, 240, 240] }
+            });
+            
+            // حفظ الملف
+            doc.save(`تقرير_المخزون_${date}.pdf`);
+            
+            showToast('تم تصدير التقرير إلى PDF');
+        }
+        
+        // ===== تهيئة الأحداث =====
+        function initReportEvents() {
+            $('#toggleReports').addEventListener('click', toggleReports);
+            $('#generateReportBtn').addEventListener('click', generateReport);
+            $('#exportExcelBtn').addEventListener('click', exportToExcel);
+            $('#exportPdfBtn').addEventListener('click', exportToPdf);
+        }
+        
+        function toggleReports() {
+            const content = $('#reportsContent');
+            const toggleBtn = $('#toggleReports');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                toggleBtn.textContent = '☰';
+            } else {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                toggleBtn.textContent = '✕';
+            }
+        }
+        
+        // ===== التهيئة عند تحميل الصفحة =====
+        document.addEventListener('DOMContentLoaded', function() {
+            initReportDates();
+            initReportEvents();
+        });
+
+        /* initialize */
+        $('#bulkOperation').style.display='none';
+        $('#bulkStatus').style.display='none';
+        $('#bulkWarehouse').style.display='none';
+        $('#bulkDepartment').style.display='none';
+
+        addSampleData();
+        render();
+        setupIconFilters(); // تهيئة نظام الأيقونات
+
+        const today = new Date().toISOString().split('T')[0];
+        $('#date').value = today;
+    </script>
+</body>
+</html>
